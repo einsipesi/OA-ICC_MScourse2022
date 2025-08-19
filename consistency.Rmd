@@ -1,0 +1,245 @@
+---
+title: "consistency_monaco"
+author: "Einar Pétur Jónsson"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(readxl)
+library(ggplot2)
+library(car)
+library(dplyr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#Temperature  
+
+## Import and view the temperature controls
+```{r}
+dataTctrl <- read_excel("consistency_tempctrl.xlsx")
+
+View(dataTctrl)
+plottTctrl <- ggplot(dataTctrl, aes(experiment, growth_rate)) + geom_boxplot()
+plottTctrl
+```
+
+
+
+
+## ANOVA test the difference between temperature controls
+```{r}
+modelTctrl <- aov(growth_rate ~ experiment, data = dataTctrl)
+summary(modelTctrl)
+```
+  
+## Look at residuals of the above anova
+
+```{r}
+qqnorm(modelTctrl$residuals)
+qqline(modelTctrl$residuals)
+```
+
+## Shapiro-Wilk test for normality of the above anova
+
+```{r}
+shapiro.test(dataTctrl$growth_rate)
+```
+### Null hypothesis of Shapiro-Wilk test not rejected. Normal
+
+## Check homogeneity of variance for the above anova
+
+```{r}
+leveneTest(growth_rate ~ experiment, data = dataTctrl)
+```
+### There is homogeneity of variance
+
+
+
+
+## Import and view the temperature treatments (25°C)
+```{r}
+dataTtreat <- read_excel("consistency_temptreat.xlsx")
+dataTtreat
+
+plottTtreat <- ggplot(dataTtreat, aes(experiment, growth_rate)) + geom_boxplot()
+plottTtreat
+```
+
+## T-test difference between temperature treatments (25°C)
+
+```{r}
+t.test(dataTtreat$growth_rate ~ dataTtreat$experiment, var.equal = TRUE)
+```
+
+## Check assumptions for the above T-test
+
+## Shapiro-Wilk test for normality of the above T-test
+
+```{r}
+shapiro.test(dataTtreat$growth_rate)
+```
+### Null hypothesis of Shapiro-Wilk test rejected. Not normal
+
+## Check homogeneity of variance for the above anova
+
+```{r}
+leveneTest(growth_rate ~ experiment, data = dataTtreat)
+```
+
+### Variance is homogeneous
+
+
+
+# pH
+
+## Import and view the pH controls
+
+```{r}
+datapHctrl <- read_excel("consistency_pHctrl.xlsx")
+
+plottpHctrl <- ggplot(datapHctrl, aes(experiment, growth_rate)) + geom_boxplot()
+plottpHctrl
+```
+
+## ANOVA test the difference between pH controls
+
+```{r}
+modelpHctrl <- aov(growth_rate ~ experiment, data = datapHctrl) 
+summary(modelpHctrl)
+```
+
+
+## Look at residuals of the above anova
+
+```{r}
+qqnorm(modelpHctrl$residuals)
+qqline(modelpHctrl$residuals)
+```
+
+### Doesn't look normal
+
+## Shapiro-Wilk test for normality of the above anova
+
+```{r}
+shapiro.test(datapHctrl$growth_rate)
+```
+### Null hypothesis of Shapiro-Wilk test not rejected. Normal
+
+## Check homogeneity of variance for the above anova
+
+```{r}
+leveneTest(growth_rate ~ experiment, data = datapHctrl)
+```
+### Null hypothesis not rejected - Homogeneous variance
+
+## Import and view the pH treatments
+
+```{r}
+datapHtreat <- read_excel("consistency_pHtreat.xlsx")
+
+
+View(datapHtreat)
+plottpHtreat <- ggplot(datapHtreat, aes(experiment, growth_rate)) + geom_boxplot()
+plottpHtreat
+```
+
+## T-test difference between pH treatments (pH 7,5)
+
+```{r}
+t.test(datapHtreat$growth_rate ~ datapHtreat$experiment, var.equal = TRUE)
+```
+## Check assumptions for the above T-test
+
+## Shapiro-Wilk test for normality of the above T-test
+
+```{r}
+shapiro.test(dataTtreat$growth_rate)
+```
+### Null hypothesis of Shapiro-Wilk test rejected. Not normal
+
+## Check homogeneity of variance for the above anova
+
+```{r}
+leveneTest(growth_rate ~ experiment, data = dataTtreat)
+```
+
+### Variance is homogeneous
+
+
+# Lithium
+
+## Import and view the Lithium controls
+```{r}
+dataLictrl <- read_excel("consistency_Lictrl.xlsx")
+
+plottLictrl <- ggplot(dataLictrl, aes(experiment, growth_rate)) + geom_boxplot()
+plottLictrl
+```
+
+
+## ANOVA test the difference between Lithium controls
+```{r}
+modelLictrl <- aov(growth_rate ~ experiment, data = dataLictrl) 
+summary(modelLictrl)
+```
+## Look at residuals of the above anova
+
+```{r}
+qqnorm(modelLictrl$residuals)
+qqline(modelLictrl$residuals)
+```
+
+### Doesn't look normal
+
+## Shapiro-Wilk test for normality of the above anova
+
+```{r}
+shapiro.test(dataLictrl$growth_rate)
+```
+### Null hypothesis of Shapiro-Wilk test not rejected. Normal
+
+## Check homogeneity of variance for the above anova
+
+```{r}
+leveneTest(growth_rate ~ experiment, data = dataLictrl)
+```
+
+
+## Import and view the Lithium treatments
+
+```{r}
+dataLitreat <- read_excel("consistency_Litreat.xlsx")
+
+plottLitreat <- ggplot(dataLitreat, aes(experiment, growth_rate)) + geom_boxplot()
+plottLitreat
+```
+
+## T-test difference between Lithium treatments (Lithium 7 ppm)
+
+```{r}
+t.test(dataLitreat$growth_rate ~ dataLitreat$experiment, var.equal = TRUE)  
+```
+
+## Check assumptions for the above T-test
+
+## Shapiro-Wilk test for normality of the above T-test
+
+```{r}
+shapiro.test(dataLitreat$growth_rate)
+```
+### Null hypothesis of Shapiro-Wilk test not rejected. Normal
+
+## Check homogeneity of variance for the above anova
+
+```{r}
+leveneTest(growth_rate ~ experiment, data = dataLitreat)
+```
+
+### Variance is not homogeneous
+
