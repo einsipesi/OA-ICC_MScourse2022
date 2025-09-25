@@ -2,7 +2,7 @@
 title: "consistency_monaco"
 author: "Einar Pétur Jónsson"
 date: "`r Sys.Date()`"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 dataTctrl <- read_excel("consistency_tempctrl.xlsx")
 
-View(dataTctrl)
+
 plottTctrl <- ggplot(dataTctrl, aes(experiment, growth_rate)) + geom_boxplot()
 plottTctrl
 ```
@@ -144,7 +144,6 @@ leveneTest(growth_rate ~ experiment, data = datapHctrl)
 datapHtreat <- read_excel("consistency_pHtreat.xlsx")
 
 
-View(datapHtreat)
 plottpHtreat <- ggplot(datapHtreat, aes(experiment, growth_rate)) + geom_boxplot()
 plottpHtreat
 ```
@@ -242,4 +241,11 @@ leveneTest(growth_rate ~ experiment, data = dataLitreat)
 ```
 
 ### Variance is not homogeneous
+
+### Get SD for the lithium treatments.
+
+```{r}
+aggregate(dataLitreat$growth_rate, by = list(dataLitreat$experiment), FUN = sd, na.rm = TRUE)
+
+```
 
