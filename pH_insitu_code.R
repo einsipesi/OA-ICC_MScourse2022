@@ -1,6 +1,6 @@
 # 
 # Here you can see how the pH in situ was calculated, and what constants were used. 
-# The names of the columns depend on which dataset you are calculating from,  and so does the TA division (have it in is in mol/kg)
+# The names of the columns depend on which dataset you are calculating from,  and so does the TA division (have it in mol/kg)
 # The calculated data was then added as new columns to the existing dataset
 # 
 
