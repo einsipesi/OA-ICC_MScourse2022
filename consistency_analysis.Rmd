@@ -1,0 +1,158 @@
+---
+title: "Consistency Analysis"
+author: "Einar Pétur Jónsson"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r libraries}
+library(readxl)
+library(ggplot2)
+library(ggpattern)
+library(dplyr)
+library(car)
+```
+
+# Data preparation
+
+```{r load-data}
+# Controls — single and multi both sourced from tempctrl file
+ctrl_data <- read_excel("consistency_tempctrl.xlsx") %>%
+  mutate(
+    group      = "Reference",
+    experiment = ifelse(grepl("single", experiment), "single", "multi")
+  )
+
+# Treatments
+dataTtreat  <- read_excel("consistency_temptreat.xlsx") %>%
+  mutate(group = "Temperature",
+         experiment = ifelse(grepl("single", experiment), "single", "multi"))
+
+datapHtreat <- read_excel("consistency_pHtreat.xlsx") %>%
+  mutate(group = "pH",
+         experiment = ifelse(grepl("single", experiment), "single", "multi"))
+
+dataLitreat <- read_excel("consistency_Litreat.xlsx") %>%
+  mutate(group = "Lithium",
+         experiment = ifelse(grepl("single", experiment), "single", "multi"))
+
+# Combine and set factor levels
+all_data <- bind_rows(ctrl_data, dataTtreat, datapHtreat, dataLitreat) %>%
+  mutate(
+    experiment = as.factor(experiment),
+    group      = factor(group, levels = c("Reference", "Temperature", "pH", "Lithium")),
+    group_exp  = factor(paste(group, experiment, sep = "_"),
+                        levels = c("Reference_single", "Reference_multi",
+                                   "Temperature_single", "Temperature_multi",
+                                   "pH_single", "pH_multi",
+                                   "Lithium_single", "Lithium_multi"))
+  )
+```
+
+# Plot
+
+```{r plot, fig.width=9, fig.height=6}
+fill_map <- c(
+  "Reference_single"   = "white",
+  "Reference_multi"    = "white",
+  "Temperature_single" = "#E69F00",
+  "Temperature_multi"  = "white",
+  "pH_single"          = "#56B4E9",
+  "pH_multi"           = "white",
+  "Lithium_single"     = "#009E73",
+  "Lithium_multi"      = "white"
+)
+
+y_label <- expression(paste("Growth rate ("*mu*"m"%.%"day"^-1*")"))
+
+shared_theme <- theme_minimal(base_size = 14) +
+  theme(
+    axis.text     = element_text(size = 12),
+    axis.title.y  = element_text(size = 14),
+    legend.text   = element_text(size = 12),
+    legend.title  = element_text(size = 14),
+    legend.position = "right"
+  )
+
+p <- ggplot(all_data, aes(x = group, y = growth_rate,
+                           fill = group_exp, pattern = experiment)) +
+  geom_boxplot_pattern(
+    position        = position_dodge(width = 0.8),
+    width           = 0.6,
+    pattern_fill    = "gray40",
+    pattern_colour  = "gray40",
+    pattern_density = 0.3,
+    pattern_spacing = 0.03,
+    colour          = "black"
+  ) +
+  scale_fill_manual(values = fill_map, guide = "none") +
+  scale_pattern_manual(
+    values = c("single" = "none", "multi" = "stripe"),
+    name   = "Experiment"
+  ) +
+  labs(x = NULL, y = y_label) +
+  shared_theme
+
+p
+
+# Save as PNG
+ggsave("consistency_plot.png", plot = p, width = 9, height = 6, dpi = 300)
+```
+
+# Statistical comparisons
+
+For each group, the pipeline: (1) tests normality with Shapiro-Wilk, (2) tests homogeneity of variance with Levene's test, and (3) selects the appropriate comparison test — Student's t-test if both groups are normal with homogeneous variance, Welch's t-test if normal but with heterogeneous variance, or a Wilcoxon rank-sum test if normality is violated.
+
+```{r stats-pipeline, results='asis'}
+groups <- c("Reference", "Temperature", "pH", "Lithium")
+
+for (g in groups) {
+
+  cat("\n## ", g, "\n\n")
+
+  df <- all_data %>% filter(group == g)
+
+  # --- Shapiro-Wilk ---
+  cat("### Normality (Shapiro-Wilk)\n\n")
+  sw_results <- list()
+  for (exp in c("single", "multi")) {
+    vals <- df %>% filter(experiment == exp) %>% pull(growth_rate)
+    sw   <- shapiro.test(vals)
+    sw_results[[exp]] <- sw$p.value
+    cat("**", exp, "**: W =", round(sw$statistic, 4),
+        ", p =", round(sw$p.value, 4),
+        ifelse(sw$p.value > 0.05, " — Normal\n\n", " — NOT normal\n\n"))
+  }
+
+  # --- Levene's test ---
+  cat("### Homogeneity of variance (Levene's test)\n\n")
+  lev <- leveneTest(growth_rate ~ experiment, data = df)
+  lev_p <- lev$`Pr(>F)`[1]
+  cat("p =", round(lev_p, 4),
+      ifelse(lev_p > 0.05, " — Homogeneous variance\n\n",
+                            " — Variance NOT homogeneous\n\n"))
+
+  # --- Choose test ---
+  both_normal <- all(unlist(sw_results) > 0.05)
+  homogeneous <- lev_p > 0.05
+
+  cat("### Comparison test\n\n")
+  if (both_normal & homogeneous) {
+    cat("Both groups normal and variance homogeneous — **Student's t-test**\n\n")
+    result <- t.test(growth_rate ~ experiment, data = df, var.equal = TRUE)
+  } else if (both_normal & !homogeneous) {
+    cat("Both groups normal but variance heterogeneous — **Welch's t-test**\n\n")
+    result <- t.test(growth_rate ~ experiment, data = df, var.equal = FALSE)
+  } else {
+    cat("Normality violated — **Wilcoxon rank-sum test**\n\n")
+    result <- wilcox.test(growth_rate ~ experiment, data = df)
+  }
+
+  print(result)
+  cat("\n---\n")
+}
+```
