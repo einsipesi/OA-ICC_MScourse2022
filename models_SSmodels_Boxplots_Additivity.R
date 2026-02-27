@@ -1,4 +1,6 @@
-# This code is from Natalija's 'Models2.html'. Annotations are therein. This is just to make figures. 
+# This code is from Natalija's 'Models2.html'. Annotations are therein. 
+# This is just to make figures.
+# Now it's just for the single driver curves. Other stuff is irrelevant
 
 
 
@@ -179,12 +181,12 @@ p_temperature <- ggplot() +
     legend.text = element_text(size = 12),  # legend entries
     strip.text = element_text(size = 13),    # facet labels (if used)
     legend.position = "none",
-    ) +
+  ) +
   scale_color_manual(name = "Legend", 
                      values = c("Observations" = "#000000", 
-                                "Model Prediction" = "#0072B2")) +
+                                "Model Prediction" = "#000000")) +
   scale_fill_manual(name = "Legend", 
-                    values = c("Model Confidence Interval" = "#56B4E9"))
+                    values = c("Model Confidence Interval" = "#E69F00"))
 
 p_temperature
 
@@ -207,7 +209,7 @@ AIC(LM_pH, P2_pH, gam_pH)
 
 #Cross validation for pH
 
-MyData <- expand.grid(pH = seq(min(pH_only$pH-0.3), 
+MyData <- expand.grid(pH = seq(min(pH_only$pH-0.2), 
                                max(pH_only$pH),
                                length = 25),
                       rate = seq(min(pH_only$rate), 
@@ -248,9 +250,9 @@ p_pH <- ggplot() +
     legend.position = "none",
   ) +
   scale_color_manual(name = "Legend", 
-                     values = c("Observations" = "#0072B2", "Model Prediction" = "#CC79A7")) +  # Colorblind-friendly palette
+                     values = c("Observations" = "#000000", "Model Prediction" = "#000000")) +  # Colorblind-friendly palette
   scale_fill_manual(name = "Legend", 
-                    values = c("Model Confidence Interval" = "#D4B9DA"))  # Colorblind-friendly palette
+                    values = c("Model Confidence Interval" = "#56B4E9"))  # Colorblind-friendly palette
 
 p_pH
 
@@ -312,9 +314,9 @@ p_Li <- ggplot() +
     legend.position = "none",
   ) +
   scale_color_manual(name = "Legend", 
-                     values = c("Observations" = "#E69F00", "Model Prediction" = "#56B4E9")) +  # Colorblind-friendly palette
+                     values = c("Observations" = "#000000", "Model Prediction" = "#000000")) +  # Colorblind-friendly palette
   scale_fill_manual(name = "Legend", 
-                    values = c("Model Confidence Interval" = "#A6DCE5"))  # Colorblind-friendly palette
+                    values = c("Model Confidence Interval" = "#009E73"))  # Colorblind-friendly palette
 
 p_Li 
 
@@ -629,15 +631,16 @@ cat("\nANOVA Results:\n")
 print(anova_results_table)
 
 
+
 Li_case_for_stat$Li_targeted_label <- factor(
   Li_case_for_stat$Li_targeted,
-  levels = c(0.18, 7.00),
-  labels = c("Li targeted: 0.18 ppm", "Li targeted: 7 ppm")
+  levels = c(7.00),
+  labels = c("Li targeted: 7 ppm")
 )
 
-pLi <- ggplot(Li_case_for_stat, aes(x = Stressors, y = GR, fill = Stressors)) +
+pLi <- ggplot(Li_case_for_stat_7, aes(x = Stressors, y = GR, fill = Stressors)) +
   geom_boxplot() +
-  facet_grid(~Li_targeted_label) +
+  #facet_grid(~Li_targeted_label) +
   labs(
     x = "Drivers",
     y = expression(paste("Growth rate ("*mu*"m"%.%"day"^-1*")"))
@@ -648,14 +651,19 @@ pLi <- ggplot(Li_case_for_stat, aes(x = Stressors, y = GR, fill = Stressors)) +
     axis.title = element_text(size = 16),
     legend.text = element_text(size = 14),
     legend.title = element_text(size = 16),
-    strip.text = element_text(size = 15)
+    strip.text = element_text(size = 15),
+    plot.title = element_text(size = 16, face = "bold")
   ) +
   scale_fill_manual(
     name = "Drivers",
-    values = c("Single" = "#E69F00", "Multiple" = "#56B4E9")
-  )
+    values = c("Single" = "#009E73", "Multiple" = "#F0E442")
+  ) + 
+  ggtitle("Lithium targeted: 7 ppm")
 
 pLi
+
+
+
 
 
 temp_case<-temp_only[,1:4]
@@ -754,13 +762,13 @@ print(anova_results_table)
 
 temp_case_for_stat$temp_targeted_label <- factor(
   temp_case_for_stat$T_targeted,
-  levels = c(20, 24),
-  labels = c("T targeted: 20 °C", "T targeted: 24 °C")
+  levels = c(24),
+  labels = c("T targeted: 24 °C")
 )
 
-ptemp <- ggplot(temp_case_for_stat, aes(x = Stressors, y = GR, fill = Stressors)) +
+ptemp <- ggplot(temp_case_for_stat_24, aes(x = Stressors, y = GR, fill = Stressors)) +
   geom_boxplot() +
-  facet_grid(~temp_targeted_label) +
+  #facet_grid(~temp_targeted_label) +
   labs(
     x = "Drivers",
     y = expression(paste("Growth rate ("*mu*"m"%.%"day"^-1*")"))
@@ -772,11 +780,13 @@ ptemp <- ggplot(temp_case_for_stat, aes(x = Stressors, y = GR, fill = Stressors)
     axis.title = element_text(size = 16),
     legend.text = element_text(size = 14),
     legend.title = element_text(size = 16),
-    strip.text = element_text(size = 15)
+    strip.text = element_text(size = 15),
+    plot.title = element_text(size = 16, face = "bold")
   ) +
   scale_fill_manual(
     name = "Drivers", 
-                    values = c("Single" = "#D55E00", "Multiple" = "#009E73"))
+    values = c("Single" = "#E69F00", "Multiple" = "#F0E442"))+
+  ggtitle("Temperature targeted: 24°C")
 
 ptemp
 
@@ -808,7 +818,7 @@ pH_case_for_stat$Treatment<-as.factor(pH_case_for_stat$Treatment)
 # Ensure GR is numeric
 pH_case_for_stat$GR <- as.numeric(pH_case_for_stat$GR)
 
-# Subset data by Li_targeted levels
+# Subset data by pH_targeted levels
 pH_case_for_stat_77<- subset(pH_case_for_stat, pH_targeted == 7.7)
 pH_case_for_stat_81 <- subset(pH_case_for_stat, pH_targeted == 8.1)
 
@@ -876,13 +886,14 @@ print(anova_results_table)
 
 pH_case_for_stat$pH_targeted_label <- factor(
   pH_case_for_stat$pH_targeted,
-  levels = c(7.7,8.1),
+  levels = c(7.7, 8.1),
   labels = c("pH targeted: 7.7", "pH targeted: 8.1")
 )
 
-ppH <- ggplot(pH_case_for_stat, aes(x = Stressors, y = GR, fill = Stressors)) +
+
+ppH <- ggplot(pH_case_for_stat_77, aes(x = Stressors, y = GR, fill = Stressors)) +
   geom_boxplot() +
-  facet_grid(~pH_targeted_label) +
+  #facet_grid(~pH_targeted_label) +
   labs(
     x = "Drivers",
     y = expression(paste("Growth rate ("*mu*"m"%.%"day"^-1*")"))
@@ -894,17 +905,19 @@ ppH <- ggplot(pH_case_for_stat, aes(x = Stressors, y = GR, fill = Stressors)) +
     axis.title = element_text(size = 16),
     legend.text = element_text(size = 14),
     legend.title = element_text(size = 16),
-    strip.text = element_text(size = 15)
+    strip.text = element_text(size = 15),
+    plot.title = element_text(size = 16, face = "bold")
   ) +
   scale_fill_manual(
     name = "Drivers", 
-                    values = c("Single" = "#0072B2", "Multiple" = "#CC79A7"))
+    values = c("Single" = "#56B4E9", "Multiple" = "#F0E442"))+
+  ggtitle("pH targeted: 7.7")
 
 ppH
 
 
-
-#png("plot_comparison.png", width = 7, height = 13, units = "in", res = 300)
+png("plot_comparison.png", width = 7, height = 13, units = "in", res = 300)
 plot_grid(ptemp, ppH, pLi, ncol = 1, align = "v", axis = "lr")
-#dev.off()
+dev.off()
+
 
