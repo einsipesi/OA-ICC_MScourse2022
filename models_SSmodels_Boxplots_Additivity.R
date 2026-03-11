@@ -324,7 +324,11 @@ p_Li
 ### Combine all into one plot ###
 
 png("plot_SSmodels.png", width = 5.5, height = 13, units = "in", res = 300)
-plot_grid(p_temperature, p_pH, p_Li, ncol = 1, align = "v", axis = "lr")
+plot_grid(p_temperature, p_pH, p_Li, ncol = 1, align = "v", axis = "lr",
+          labels = c("A", "B", "C"),
+          label_size = 14,
+          label_x = 0, label_y = 1,
+          hjust = -0.5, vjust = 1.5)
 dev.off()
 
 
@@ -525,12 +529,12 @@ library(cowplot)
 
 
 
-png("plotCV_comparison.png", width = 8, height = 10, units = "in", res = 300)
+#png("plotCV_comparison.png", width = 8, height = 10, units = "in", res = 300)
 plot_grid(p_cvss, p_cvms, 
           ncol = 1,       # One column = vertical layout
           align = "v",    # Align vertically
           axis = "lr")    # Align left and right axesdev.off()
-dev.off()
+#dev.off()
 
 
 
@@ -916,8 +920,8 @@ ppH <- ggplot(pH_case_for_stat_77, aes(x = Stressors, y = GR, fill = Stressors))
 ppH
 
 
-png("plot_comparison.png", width = 7, height = 13, units = "in", res = 300)
+#png("plot_comparison.png", width = 7, height = 13, units = "in", res = 300)
 plot_grid(ptemp, ppH, pLi, ncol = 1, align = "v", axis = "lr")
-dev.off()
+#dev.off()
 
 
